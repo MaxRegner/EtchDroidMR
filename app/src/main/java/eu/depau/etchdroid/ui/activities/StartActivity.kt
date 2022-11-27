@@ -19,6 +19,7 @@ import me.jahnen.libaums.libusbcommunication.LibusbCommunicationCreator
 import java.io.File
 
 
+
 class StartActivity : ActivityBase() {
     private var delayedButtonClicked: Boolean = false
 
@@ -103,6 +104,44 @@ class StartActivity : ActivityBase() {
         dialogFragment.show(supportFragmentManager, "DMGBetaAlertDialogFragment")
     }
 
+    private fun showAndroidPieAlertDialog(callback: () -> Unit) {
+        val dialogFragment = DoNotShowAgainDialogFragment(isNightMode)
+        dialogFragment.title = getString(R.string.android_pie)
+        dialogFragment.message = getString(R.string.android_pie_alert_dialog_text)
+        dialogFragment.positiveButton = getString(R.string.i_understand)
+        dialogFragment.listener = object : DoNotShowAgainDialogFragment.DialogListener {
+            override fun onDialogNegative(dialog: DoNotShowAgainDialogFragment, showAgain: Boolean) {}
+            override fun onDialogPositive(dialog: DoNotShowAgainDialogFragment, showAgain: Boolean) {
+                shouldShowAndroidPieAlertDialog = showAgain
+                callback()
+            }
+        }
+        dialogFragment.show(supportFragmentManager, "AndroidPieAlertDialogFragment")
+    }
+
+    private fun showFilePicker() {
+        val chooser = StorageChooser.Builder()
+                .withActivity(this)
+                .withFragmentManager(fragmentManager)
+                .withMemoryBar(true)
+                .allowCustomPath(true)
+                .setType(StorageChooser.FILE_PICKER)
+                .build()
+
+        chooser.setOnSelectListener {
+            val file = File(it)
+            if (file.exists() && file.canRead()) {
+                StateKeeper.imageFile = file
+                startActivity(Intent(this, FlashActivity::class.java))
+            } else {
+                toast(R.string.file_not_readable, Toast.LENGTH_LONG)
+            }
+        }
+
+        chooser.show()
+    }
+
+
 
     private fun showFilePicker() {
         when (StateKeeper.flashMethod) {
@@ -172,6 +211,75 @@ class StartActivity : ActivityBase() {
             }
         }
     }
+
+    private fun nextStep() {
+        val intent = Intent(this, FlashActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun checkAndRequestStorageReadPerm(): Boolean {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), READ_EXTERNAL_STORAGE_PERMISSION)
+            return false
+        }
+        return true
+    }
+
+    private fun showAndroidPieAlertDialog(callback: () -> Unit) {
+        val dialogFragment = DoNotShowAgainDialogFragment(isNightMode)
+        dialogFragment.title = getString(R.string.android_pie)
+        dialogFragment.message = getString(R.string.android_pie_alert_dialog_text)
+        dialogFragment.positiveButton = getString(R.string.i_understand)
+        dialogFragment.listener = object : DoNotShowAgainDialogFragment.DialogListener {
+            override fun onDialogNegative(dialog: DoNotShowAgainDialogFragment, showAgain: Boolean) {}
+            override fun onDialogPositive(dialog: DoNotShowAgainDialogFragment, showAgain: Boolean) {
+                shouldShowAndroidPieAlertDialog = showAgain
+                callback()
+            }
+        }
+        dialogFragment.show(supportFragmentManager, "AndroidPieAlertDialogFragment")
+    }
+
+    private fun openBrokenUsbPage() {
+        val intent = Intent(this, BrokenUsbActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun openAboutPage() {
+        val intent = Intent(this, AboutActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun openSettingsPage() {
+        val intent = Intent(this, SettingsActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun openHelpPage() {
+        val intent = Intent(this, HelpActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun openDonatePage() {
+        val intent = Intent(this, DonateActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun openChangelogPage() {
+        val intent = Intent(this, ChangelogActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun openLicensePage() {
+        val intent = Intent(this, LicenseActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun openPrivacyPolicyPage() {
+        val intent = Intent(this, PrivacyPolicyActivity::class.java)
+        startActivity(intent)
+    }
+
 
     private fun nextStep() {
         val intent = Intent(this, UsbDrivePickerActivity::class.java)
